@@ -14,22 +14,22 @@ class Product
     private $serialNumber;
 
     /**
-     * @var BigDecimal
+     * @var BigDecimal|null
      */
     private $price;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $desc;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $longDesc;
 
     /**
-     * @var int
+     * @var int|null
      */
     private $counter;
 
@@ -58,33 +58,33 @@ class Product
     }
 
     /**
-     * @return BigDecimal
+     * @return BigDecimal|null
      */
-    public function getPrice(): BigDecimal
+    public function getPrice(): ?BigDecimal
     {
         return $this->price;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getDesc(): string
+    public function getDesc(): ?string
     {
         return $this->desc;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getLongDesc(): string
+    public function getLongDesc(): ?string
     {
         return $this->longDesc;
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getCounter(): int
+    public function getCounter(): ?int
     {
         return $this->counter;
     }
@@ -94,20 +94,15 @@ class Product
      */
     public function decrementCounter(): void
     {
-        if ($this->price != null && $this->price->getSign() > 0) {
-            if ($this->counter === null) {
-                throw new \Exception("null counter");
-            }
-
-            $this->counter = $this->counter - 1;
-
-            if ($this->counter < 0) {
-                throw new \Exception("Negative counter");
-            }
-        } else {
-            throw new \Exception("Invalid price");
-
+        if ($this->counter === null) {
+            throw new \Exception("null counter");
         }
+
+        if ($this->counter === 0) {
+            throw new \Exception("Negative counter");
+        }
+
+        --$this->counter;
     }
 
     /**
@@ -115,19 +110,11 @@ class Product
      */
     public function incrementCounter(): void
     {
-        if ($this->price != null && $this->price->getSign() > 0) {
-            if ($this->counter === null) {
-                throw new \Exception("null counter");
-            }
-
-            if ($this->counter + 1 < 0) {
-                throw new \Exception("Negative counter");
-            }
-
-            $this->counter = $this->counter + 1;
-        } else {
-            throw new \Exception("Invalid price");
+        if ($this->counter === null) {
+            throw new \Exception("null counter");
         }
+
+        ++$this->counter;
     }
 
     /**
@@ -136,17 +123,11 @@ class Product
      */
     public function changePriceTo(?BigDecimal $newPrice): void
     {
-        if ($this->counter === null) {
-            throw new \Exception("null counter");
+        if ($newPrice === null) {
+            throw new \Exception("new price null");
         }
 
-        if ($this->counter > 0) {
-            if ($newPrice === null) {
-                throw new \Exception("new price null");
-            }
-
-            $this->price = $newPrice;
-        }
+        $this->price = $newPrice;
     }
 
     /**
@@ -156,10 +137,6 @@ class Product
      */
     public function replaceCharFromDesc(?string $charToReplace, ?string $replaceWith): void
     {
-        if ($this->longDesc === null || empty($this->longDesc) || $this->desc === null || empty($this->desc)) {
-            throw new \Exception("null or empty desc");
-        }
-
         $this->longDesc = str_replace($charToReplace, $replaceWith, $this->longDesc);
         $this->desc = str_replace($charToReplace, $replaceWith, $this->desc);
     }
@@ -167,8 +144,9 @@ class Product
     /**
      * @return string
      */
-    public function formatDesc(): string {
-        if ($this->longDesc === null || empty($this->longDesc) || $this->desc === null || empty($this->desc)) {
+    public function formatDesc(): string
+    {
+        if (empty($this->longDesc) || empty($this->desc)) {
             return "";
         }
 

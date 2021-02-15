@@ -1,0 +1,45 @@
+1.  Typ zmiennej $price (w adnotacji) to BigDecimal, podczas gdy w konstruktrze można podać dla ceny wartość null
+    - Poprawiam to gdyż to w 100% niezamierzony bug. Pytanie co: zmienną czy argument.
+    - Ponieważ mam nieruszać interfejsu klasy, zmieniam typ zmiennej $price na "BigDecimal|null" (w adnotacji).
+    - To samo robię dla pozostałych zmiennych oprócz $serialNumber
+
+1.  'decrementCounter' i 'incrementCounter' zawierały logikę związaną z ceną, która powinna trafić poza klasę Product.
+    - Dość duży refaktor, ale z reguły cena zasługuje na włąsną klasę.
+2.
+    Dla zmiennej $counter===null, decrementCounter/incrementCounter nigdy się nie wykonają, a zmienna już na zawsze będzie null'em.
+    - Jak dla mnie to bug.
+    - Nieznam kontekstu zmiennej $counter=null, możliwe że to jest potrzebne. Niemam kogo spytać. Testy niepokrywają tego przypadku.
+    - Mam 3 opcje:
+        - Dodać w konstrutkorze domyślną wartość = 0 - ale to zmiana logiki, coś zalerznego od null na pewno gdzieś padnie
+        - Dodać jednorazowy inicjalizator initCounter (za zabezpieczeniem przed nadpisaniem) - bezpieczne, ale to droga do produkcji nadmiarowego kodu
+        - Dowiedzieć się po co komu null dla $counter i w zalerzności do tego decydować co dalej.
+    - Wybieram 3 opcje.
+
+3.  'changePriceTo' jest zależna od counter. To niema żadnego sensu. Usuwam.
+
+4. 'changePriceTo' spr czy $newPrice !== null.
+    - Wystarczy zmienić argument funkcji z '?BigDecimal' na 'BigDecimal' by uzyskać to samo.
+    - Ale mam nie zmieniać interfejsu klasy, wiec zostawiam jak jest.
+    - Brakuje mi spojrzenia na całość systemmu by wiedzieć dlaczego oparto to spr na rzucaniu wyjątkiem.
+    - Dlaczego w konstruktorze wolno dać null a w seterze już nie? Bez sensu.
+    - Rzecz do zmiany po większym researchu który odpowie na powyższe pytania.
+
+5. Wszystkie gettery (oprócz serialNumber) zawierają mają błędny typ zwrotki.
+    - Każdy z nich się wywali gdy będzie zwracała null.
+    - Poprawiam to gdyż to w 100% niezamierzony bug.
+
+6. incrementCounter niepotrzebuje spr czy $counter jest negatywny - usuwam to
+
+7. W incrementCounter/decrementCounter lepsze będzie ++/-- zamiast +1/-1
+
+8. W decrementCounter sprawdzam czy wartość będzie jest większa od zera przez dekrementacją
+
+9. replaceCharFromDesc
+    - w konstruktorze longDesc i desc są od siebie całkowicie niezalerzne
+    - wspólny IF blokuje zmiany dla obu, gdy jedena z wartości jest === null, to wygląda na bug
+    - w ogóle IF jest tam niepotrzebny, gdyż str_replace poradzi sobie z samymi nullami
+    - nazwa metody jest myląca. Powinno być bardziej strReplaceDesc albo coś w tym stylu
+
+10. formatDesc
+    - raczej pozwolił bym zwracać samo longDesc lub samo desc. Ale wolał bym się upewnić przed modyfikacją, wiec zostawiam jak jest.
+    - w IF wystarczy samo empty(...), nie ma potrzeby sprawdząc czy coś jest nullem
